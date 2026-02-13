@@ -8,6 +8,24 @@ function setActiveNav() {
   });
 }
 
+function setupMenuToggle() {
+  const toggle = document.querySelector(".menu-toggle");
+  const nav = document.getElementById("main-nav");
+  if (!toggle || !nav) return;
+
+  toggle.addEventListener("click", () => {
+    const isOpen = nav.classList.toggle("is-open");
+    toggle.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  nav.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => {
+      nav.classList.remove("is-open");
+      toggle.setAttribute("aria-expanded", "false");
+    });
+  });
+}
+
 function renderHome(content) {
   const title = document.getElementById("home-title");
   const subtitle = document.getElementById("home-subtitle");
@@ -215,11 +233,12 @@ function applyCommon(content) {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const { getContent } = window.TDigitalContent;
-  const content = getContent();
+  const content = await getContent();
 
   applyCommon(content);
+  setupMenuToggle();
   setActiveNav();
   renderHome(content);
   renderServices(content);

@@ -1,72 +1,116 @@
-const ADMIN_AUTH_KEY = "tDigitalAdminAuth";
-const ADMIN_CREDENTIALS_KEY = "tDigitalAdminCredentials";
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "tdigital2026";
+const ADMIN_TOKEN_KEY = "tDigitalAdminToken";
 
-function getStoredCredentials() {
-  const raw = localStorage.getItem(ADMIN_CREDENTIALS_KEY);
-  if (!raw) {
-    return { username: ADMIN_USERNAME, password: ADMIN_PASSWORD };
-  }
+function getToken() {
+  return sessionStorage.getItem(ADMIN_TOKEN_KEY) || "";
+}
+
+function setToken(token) {
+  sessionStorage.setItem(ADMIN_TOKEN_KEY, token);
+}
+
+function clearToken() {
+  sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+}
+
+async function requestAuth(path, options = {}) {
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.headers || {})
+  };
+  return fetch(path, { ...options, headers });
+}
+
+async function isAdminAuthenticated() {
+  const token = getToken();
+  if (!token) return false;
+
   try {
-    const parsed = JSON.parse(raw);
-    const username = String(parsed.username || "").trim();
-    const password = String(parsed.password || "");
-    if (!username || !password) {
-      return { username: ADMIN_USERNAME, password: ADMIN_PASSWORD };
-    }
-    return { username, password };
+    const response = await requestAuth("/api/auth/me", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.ok;
   } catch {
-    return { username: ADMIN_USERNAME, password: ADMIN_PASSWORD };
+    return false;
   }
 }
 
-function isAdminAuthenticated() {
-  return sessionStorage.getItem(ADMIN_AUTH_KEY) === "1";
-}
-
-function protectAdminRoute() {
+async function protectAdminRoute() {
   const currentPage = location.pathname.split("/").pop() || "admin.html";
   if (currentPage === "admin-login.html") return;
-  if (isAdminAuthenticated()) return;
+
+  const authenticated = await isAdminAuthenticated();
+  if (authenticated) return;
+
+  clearToken();
   location.replace(`admin-login.html?next=${encodeURIComponent(currentPage)}`);
 }
 
-function adminLogin(username, password) {
-  const creds = getStoredCredentials();
-  const isValid = username === creds.username && password === creds.password;
-  if (!isValid) return false;
-  sessionStorage.setItem(ADMIN_AUTH_KEY, "1");
+async function adminLogin(username, password) {
+  const response = await requestAuth("/api/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ username, password })
+  });
+
+  if (!response.ok) return false;
+  const payload = await response.json();
+  if (!payload.token) return false;
+  setToken(payload.token);
   return true;
 }
 
-function updateAdminCredentials(nextUsername, nextPassword) {
-  const username = String(nextUsername || "").trim();
-  const password = String(nextPassword || "");
-  if (!username || !password) return false;
-  localStorage.setItem(
-    ADMIN_CREDENTIALS_KEY,
-    JSON.stringify({
-      username,
-      password
+async function getAdminUsername() {
+  const token = getToken();
+  if (!token) return "";
+
+  const response = await requestAuth("/api/auth/me", {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!response.ok) return "";
+  const payload = await response.json();
+  return payload.user && payload.user.username ? payload.user.username : "";
+}
+
+async function updateAdminCredentials(currentPassword, nextUsername, nextPassword) {
+  const token = getToken();
+  if (!token) throw new Error("Nicht autorisiert.");
+
+  const response = await requestAuth("/api/admin/credentials", {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({
+      currentPassword,
+      newUsername: nextUsername,
+      newPassword: nextPassword
     })
-  );
-  return true;
-}
+  });
 
-function getAdminUsername() {
-  return getStoredCredentials().username;
+  if (!response.ok) {
+    let message = "Zugangsdaten konnten nicht aktualisiert werden.";
+    try {
+      const errorPayload = await response.json();
+      if (errorPayload && errorPayload.error) {
+        message = errorPayload.error;
+      }
+    } catch {
+      // Use fallback message.
+    }
+    throw new Error(message);
+  }
+
+  return response.json();
 }
 
 function adminLogout() {
-  sessionStorage.removeItem(ADMIN_AUTH_KEY);
+  clearToken();
   location.replace("admin-login.html");
 }
 
 protectAdminRoute();
 
 window.TDigitalAdminAuth = {
-  ADMIN_USERNAME,
+  getToken,
   isAdminAuthenticated,
   adminLogin,
   adminLogout,

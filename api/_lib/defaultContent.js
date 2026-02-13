@@ -43,64 +43,6 @@ const defaultContent = {
   ]
 };
 
-function normalizeContent(parsed) {
-  return {
-    ...structuredClone(defaultContent),
-    ...(parsed || {}),
-    home: { ...defaultContent.home, ...((parsed && parsed.home) || {}) },
-    about: { ...defaultContent.about, ...((parsed && parsed.about) || {}) },
-    contacts: { ...defaultContent.contacts, ...((parsed && parsed.contacts) || {}) },
-    services: Array.isArray(parsed && parsed.services) ? parsed.services : defaultContent.services,
-    projects: Array.isArray(parsed && parsed.projects) ? parsed.projects : defaultContent.projects
-  };
-}
-
-async function getContent() {
-  try {
-    const response = await fetch("/api/content", {
-      headers: { Accept: "application/json" }
-    });
-    if (!response.ok) {
-      return structuredClone(defaultContent);
-    }
-    const payload = await response.json();
-    return normalizeContent(payload.content);
-  } catch {
-    return structuredClone(defaultContent);
-  }
-}
-
-async function saveContent(nextContent, token) {
-  const response = await fetch("/api/admin/content", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({
-      content: normalizeContent(nextContent)
-    })
-  });
-
-  if (!response.ok) {
-    let message = "Speichern fehlgeschlagen.";
-    try {
-      const errorPayload = await response.json();
-      if (errorPayload && errorPayload.error) {
-        message = errorPayload.error;
-      }
-    } catch {
-      // Use fallback message.
-    }
-    throw new Error(message);
-  }
-
-  return response.json();
-}
-
-window.TDigitalContent = {
-  defaultContent,
-  normalizeContent,
-  getContent,
-  saveContent
+module.exports = {
+  defaultContent
 };

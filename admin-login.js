@@ -1,7 +1,7 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const { isAdminAuthenticated, adminLogin } = window.TDigitalAdminAuth;
 
-  if (isAdminAuthenticated()) {
+  if (await isAdminAuthenticated()) {
     location.replace("admin.html");
     return;
   }
@@ -11,9 +11,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const password = document.getElementById("password");
   const error = document.getElementById("loginError");
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const ok = adminLogin(username.value.trim(), password.value);
+    error.textContent = "";
+    let ok = false;
+    try {
+      ok = await adminLogin(username.value.trim(), password.value);
+    } catch {
+      error.textContent = "Serverfehler. Bitte erneut versuchen.";
+      return;
+    }
     if (!ok) {
       error.textContent = "Falscher Login oder falsches Passwort.";
       return;

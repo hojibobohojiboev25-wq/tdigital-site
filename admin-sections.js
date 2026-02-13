@@ -45,7 +45,7 @@ function initHomePage(state, saveContent) {
   homeCtaText.value = state.home.ctaText;
   homeCtaLink.value = state.home.ctaLink;
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const next = {
       ...state,
@@ -58,7 +58,13 @@ function initHomePage(state, saveContent) {
         ctaLink: homeCtaLink.value.trim() || "services.html"
       }
     };
-    saveContent(next);
+    try {
+      await saveContent(next);
+    } catch (error) {
+      status.textContent = error.message || "Speichern fehlgeschlagen.";
+      status.hidden = false;
+      return;
+    }
     showSaved(status);
   });
 }
@@ -72,7 +78,7 @@ function initAboutPage(state, saveContent) {
   aboutText.value = state.about.text;
   aboutMission.value = state.about.mission;
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const next = {
       ...state,
@@ -81,7 +87,13 @@ function initAboutPage(state, saveContent) {
         mission: aboutMission.value.trim()
       }
     };
-    saveContent(next);
+    try {
+      await saveContent(next);
+    } catch (error) {
+      status.textContent = error.message || "Speichern fehlgeschlagen.";
+      status.hidden = false;
+      return;
+    }
     showSaved(status);
   });
 }
@@ -101,7 +113,7 @@ function initContactsPage(state, saveContent) {
   telegram.value = state.contacts.telegram;
   workingHours.value = state.contacts.workingHours;
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const next = {
       ...state,
@@ -113,7 +125,13 @@ function initContactsPage(state, saveContent) {
         workingHours: workingHours.value.trim()
       }
     };
-    saveContent(next);
+    try {
+      await saveContent(next);
+    } catch (error) {
+      status.textContent = error.message || "Speichern fehlgeschlagen.";
+      status.hidden = false;
+      return;
+    }
     showSaved(status);
   });
 }
@@ -159,7 +177,7 @@ function initServicesPage(state, saveContent) {
     renderServiceRows(rows, services);
   });
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const nextServices = Array.from(rows.children)
       .map((row) => ({
@@ -172,7 +190,13 @@ function initServicesPage(state, saveContent) {
       ...state,
       services: nextServices
     };
-    saveContent(next);
+    try {
+      await saveContent(next);
+    } catch (error) {
+      status.textContent = error.message || "Speichern fehlgeschlagen.";
+      status.hidden = false;
+      return;
+    }
     showSaved(status);
   });
 }
@@ -220,7 +244,7 @@ function initProjectsPage(state, saveContent) {
     renderProjectRows(rows, projects);
   });
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const nextProjects = Array.from(rows.children)
       .map((row) => ({
@@ -234,7 +258,13 @@ function initProjectsPage(state, saveContent) {
       ...state,
       projects: nextProjects
     };
-    saveContent(next);
+    try {
+      await saveContent(next);
+    } catch (error) {
+      status.textContent = error.message || "Speichern fehlgeschlagen.";
+      status.hidden = false;
+      return;
+    }
     showSaved(status);
   });
 }
@@ -242,10 +272,14 @@ function initProjectsPage(state, saveContent) {
 function initDashboard(defaultContent, saveContent) {
   const reset = document.getElementById("resetDefault");
   if (reset) {
-    reset.addEventListener("click", () => {
+    reset.addEventListener("click", async () => {
       if (!confirm("Mochten Sie alle Inhalte auf Standardwerte zurucksetzen?")) return;
-      saveContent(defaultContent);
-      alert("Inhalte wurden zuruckgesetzt.");
+      try {
+        await saveContent(defaultContent);
+        alert("Inhalte wurden zuruckgesetzt.");
+      } catch {
+        alert("Zurucksetzen fehlgeschlagen.");
+      }
     });
   }
 
@@ -253,16 +287,20 @@ function initDashboard(defaultContent, saveContent) {
   if (!credentialsForm) return;
 
   const newAdminLogin = document.getElementById("newAdminLogin");
+  const currentAdminPassword = document.getElementById("currentAdminPassword");
   const newAdminPassword = document.getElementById("newAdminPassword");
   const confirmAdminPassword = document.getElementById("confirmAdminPassword");
   const credentialsStatus = document.getElementById("credentialsStatus");
   const { getAdminUsername, updateAdminCredentials } = window.TDigitalAdminAuth;
 
-  newAdminLogin.value = getAdminUsername();
+  getAdminUsername().then((username) => {
+    newAdminLogin.value = username || "";
+  });
 
-  credentialsForm.addEventListener("submit", (event) => {
+  credentialsForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const username = newAdminLogin.value.trim();
+    const currentPassword = currentAdminPassword.value;
     const password = newAdminPassword.value;
     const confirmPassword = confirmAdminPassword.value;
 
@@ -284,13 +322,15 @@ function initDashboard(defaultContent, saveContent) {
       return;
     }
 
-    const saved = updateAdminCredentials(username, password);
-    if (!saved) {
-      credentialsStatus.textContent = "Daten konnten nicht gespeichert werden.";
+    try {
+      await updateAdminCredentials(currentPassword, username, password);
+    } catch (error) {
+      credentialsStatus.textContent = error.message || "Daten konnten nicht gespeichert werden.";
       credentialsStatus.hidden = false;
       return;
     }
 
+    currentAdminPassword.value = "";
     newAdminPassword.value = "";
     confirmAdminPassword.value = "";
     credentialsStatus.textContent = "Neue Zugangsdaten wurden gespeichert.";
@@ -298,10 +338,12 @@ function initDashboard(defaultContent, saveContent) {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const { getContent, saveContent, defaultContent } = window.TDigitalContent;
-  const { adminLogout } = window.TDigitalAdminAuth;
-  const state = getContent();
+  const { adminLogout, getToken } = window.TDigitalAdminAuth;
+  const state = await getContent();
+  const token = getToken();
+  const saveContentWithAuth = (content) => saveContent(content, token);
   const page = document.body.dataset.adminPage;
 
   markActiveAdminNav();
@@ -310,10 +352,10 @@ document.addEventListener("DOMContentLoaded", () => {
     button.addEventListener("click", adminLogout);
   });
 
-  if (page === "home") initHomePage(state, saveContent);
-  if (page === "services") initServicesPage(state, saveContent);
-  if (page === "about") initAboutPage(state, saveContent);
-  if (page === "contacts") initContactsPage(state, saveContent);
-  if (page === "projects") initProjectsPage(state, saveContent);
-  if (page === "dashboard") initDashboard(defaultContent, saveContent);
+  if (page === "home") initHomePage(state, saveContentWithAuth);
+  if (page === "services") initServicesPage(state, saveContentWithAuth);
+  if (page === "about") initAboutPage(state, saveContentWithAuth);
+  if (page === "contacts") initContactsPage(state, saveContentWithAuth);
+  if (page === "projects") initProjectsPage(state, saveContentWithAuth);
+  if (page === "dashboard") initDashboard(defaultContent, saveContentWithAuth);
 });
