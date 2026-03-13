@@ -59,6 +59,6 @@ module.exports = async function handler(req, res) {
       }
     });
   } catch (error) {
-    return sendJson(res, 500, { error: "Failed to update credentials.", details: error.message });
+    return sendJson(res, 500, { error: "Failed to update credentials." });
   }
 };

@@ -18,7 +18,7 @@ module.exports = async function handler(req, res) {
       const content = await getContent();
       return sendJson(res, 200, { content });
     } catch (error) {
-      return sendJson(res, 500, { error: "Failed to load content.", details: error.message });
+      return sendJson(res, 500, { error: "Failed to load content." });
     }
   }
 
@@ -39,7 +39,7 @@ module.exports = async function handler(req, res) {
       const saved = await saveContent(content);
       return sendJson(res, 200, { content: saved.data, updatedAt: saved.updated_at });
     } catch (error) {
-      return sendJson(res, 500, { error: "Failed to save content.", details: error.message });
+      return sendJson(res, 500, { error: "Failed to save content." });
     }
   }
 

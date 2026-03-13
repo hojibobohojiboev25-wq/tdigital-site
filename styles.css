@@ -238,6 +238,42 @@ main {
   margin-top: 14px;
 }
 
+.founder-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: center;
+}
+
+.founder-photo-wrap {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(12, 20, 40, 0.7));
+}
+
+.founder-photo-wrap img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  display: block;
+}
+
+.founder-info h3 {
+  margin-top: 0;
+}
+
+.founder-hero {
+  margin-top: 32px;
+}
+
+.founder-links {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .list {
   display: grid;
   gap: 12px;
@@ -310,5 +346,13 @@ main {
   .nav a {
     width: 100%;
     border-radius: 8px;
+  }
+
+  .founder-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .founder-photo-wrap img {
+    height: 220px;
   }
 }

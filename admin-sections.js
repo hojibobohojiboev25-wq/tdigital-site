@@ -74,9 +74,25 @@ function initAboutPage(state, saveContent) {
   const status = document.getElementById("status");
   const aboutText = document.getElementById("aboutText");
   const aboutMission = document.getElementById("aboutMission");
+  const founderName = document.getElementById("founderName");
+  const founderRole = document.getElementById("founderRole");
+  const founderShortBio = document.getElementById("founderShortBio");
+  const founderFullBio = document.getElementById("founderFullBio");
+  const founderPhotoUrl = document.getElementById("founderPhotoUrl");
+  const founderLinkedIn = document.getElementById("founderLinkedIn");
+  const founderEmail = document.getElementById("founderEmail");
+
+  const founder = (state.about && state.about.founder) || {};
 
   aboutText.value = state.about.text;
   aboutMission.value = state.about.mission;
+  if (founderName) founderName.value = founder.name || "";
+  if (founderRole) founderRole.value = founder.role || "";
+  if (founderShortBio) founderShortBio.value = founder.shortBio || "";
+  if (founderFullBio) founderFullBio.value = founder.fullBio || "";
+  if (founderPhotoUrl) founderPhotoUrl.value = founder.photoUrl || "";
+  if (founderLinkedIn) founderLinkedIn.value = founder.linkedin || "";
+  if (founderEmail) founderEmail.value = founder.email || "";
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -84,7 +100,16 @@ function initAboutPage(state, saveContent) {
       ...state,
       about: {
         text: aboutText.value.trim(),
-        mission: aboutMission.value.trim()
+        mission: aboutMission.value.trim(),
+        founder: {
+          name: founderName.value.trim(),
+          role: founderRole.value.trim(),
+          shortBio: founderShortBio.value.trim(),
+          fullBio: founderFullBio.value.trim(),
+          photoUrl: founderPhotoUrl.value.trim(),
+          linkedin: founderLinkedIn.value.trim(),
+          email: founderEmail.value.trim()
+        }
       }
     };
     try {

@@ -61,6 +61,66 @@ function renderAbout(content) {
   const mission = document.getElementById("about-mission");
   if (text) text.textContent = content.about.text;
   if (mission) mission.textContent = content.about.mission;
+
+  const founder = content.about && content.about.founder ? content.about.founder : null;
+  const previewName = document.getElementById("founder-name");
+  const previewRole = document.getElementById("founder-role");
+  const previewBio = document.getElementById("founder-short-bio");
+  const previewPhoto = document.getElementById("founder-photo");
+
+  if (founder && previewName && previewRole && previewBio && previewPhoto) {
+    previewName.textContent = founder.name || "";
+    previewRole.textContent = founder.role || "";
+    previewBio.textContent = founder.shortBio || "";
+    if (founder.photoUrl) {
+      previewPhoto.src = founder.photoUrl;
+      previewPhoto.style.display = "block";
+    } else {
+      previewPhoto.style.display = "none";
+    }
+  }
+
+  const fullName = document.getElementById("founder-name-full");
+  const fullRole = document.getElementById("founder-role-full");
+  const fullBio = document.getElementById("founder-full-bio");
+  const fullPhoto = document.getElementById("founder-photo-full");
+  const emailLink = document.getElementById("founder-email-link");
+  const linkedInLink = document.getElementById("founder-linkedin-link");
+
+  if (founder && fullName && fullRole && fullBio && fullPhoto) {
+    fullName.textContent = founder.name || "Grunder";
+    fullRole.textContent = founder.role || "";
+    fullBio.textContent = founder.fullBio || founder.shortBio || "";
+    if (founder.photoUrl) {
+      fullPhoto.src = founder.photoUrl;
+      fullPhoto.style.display = "block";
+    } else {
+      fullPhoto.style.display = "none";
+    }
+
+    if (emailLink) {
+      if (founder.email) {
+        emailLink.href = `mailto:${founder.email}`;
+        emailLink.textContent = founder.email;
+        emailLink.style.display = "inline-block";
+      } else {
+        emailLink.style.display = "none";
+      }
+    }
+
+    if (linkedInLink) {
+      if (founder.linkedin) {
+        const href = /^https?:\/\//i.test(founder.linkedin)
+          ? founder.linkedin
+          : `https://www.linkedin.com/in/${founder.linkedin.replace(/^@/, "")}`;
+        linkedInLink.href = href;
+        linkedInLink.textContent = "LinkedIn Profil";
+        linkedInLink.style.display = "inline-block";
+      } else {
+        linkedInLink.style.display = "none";
+      }
+    }
+  }
 }
 
 function renderContacts(content) {

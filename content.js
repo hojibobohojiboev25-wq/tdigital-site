@@ -24,7 +24,18 @@ const defaultContent = {
     text:
       "T.Digital ist ein Team, das digitale Losungen fur kleine Unternehmen entwickelt. Wir verbinden Design, Entwicklung und praxisnahe Umsetzung, damit Ihre Prozesse schneller und effizienter laufen.",
     mission:
-      "Unser Ziel ist es, die Leistungsfahigkeit kleiner Unternehmen zu verbessern und die technologische Entwicklung im Unternehmertum aktiv zu unterstutzen."
+      "Unser Ziel ist es, die Leistungsfahigkeit kleiner Unternehmen zu verbessern und die technologische Entwicklung im Unternehmertum aktiv zu unterstutzen.",
+    founder: {
+      name: "Grundername",
+      role: "Grunder & Leitung",
+      shortBio:
+        "Kurzbeschreibung des Grunders und seiner Rolle bei T.Digital. Dieser Text erscheint im Uber-uns-Bereich.",
+      fullBio:
+        "Ausfuhrlicher Text uber den Grunder: Hintergrund, Erfahrung und Vision fur T.Digital und die Unterstutzung kleiner Unternehmen.",
+      photoUrl: "https://images.pexels.com/photos/1181519/pexels-photo-1181519.jpeg",
+      linkedin: "",
+      email: ""
+    }
   },
   contacts: {
     email: "hello@t-digital.de",
@@ -44,11 +55,20 @@ const defaultContent = {
 };
 
 function normalizeContent(parsed) {
+  const parsedAbout = (parsed && parsed.about) || {};
+  const parsedFounder = parsedAbout.founder || {};
   return {
     ...structuredClone(defaultContent),
     ...(parsed || {}),
     home: { ...defaultContent.home, ...((parsed && parsed.home) || {}) },
-    about: { ...defaultContent.about, ...((parsed && parsed.about) || {}) },
+    about: {
+      ...defaultContent.about,
+      ...parsedAbout,
+      founder: {
+        ...defaultContent.about.founder,
+        ...parsedFounder
+      }
+    },
     contacts: { ...defaultContent.contacts, ...((parsed && parsed.contacts) || {}) },
     services: Array.isArray(parsed && parsed.services) ? parsed.services : defaultContent.services,
     projects: Array.isArray(parsed && parsed.projects) ? parsed.projects : defaultContent.projects

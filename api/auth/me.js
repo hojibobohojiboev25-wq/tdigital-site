@@ -24,6 +24,6 @@ module.exports = async function handler(req, res) {
       }
     });
   } catch (error) {
-    return sendJson(res, 500, { error: "Auth check failed.", details: error.message });
+    return sendJson(res, 500, { error: "Auth check failed." });
   }
 };

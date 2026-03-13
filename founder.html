@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>T.Digital - Uber uns</title>
+    <title>T.Digital - Grunder</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -24,30 +24,21 @@
     </header>
 
     <main class="container">
-      <h1 class="section-title">Uber uns</h1>
-      <div class="card">
-        <p id="about-text"></p>
-      </div>
-      <div class="card" style="margin-top: 16px">
-        <h3>Unser Ziel</h3>
-        <p id="about-mission"></p>
-      </div>
-
-      <section class="featured-project" style="margin-top: 28px">
-        <h2 class="section-title" style="font-size: 26px">Unser Grunder</h2>
-        <article class="card founder-preview">
-          <div class="founder-layout">
-            <div class="founder-photo-wrap">
-              <img id="founder-photo" alt="Grunderfoto" loading="lazy" />
-            </div>
-            <div class="founder-info">
-              <h3 id="founder-name"></h3>
-              <p class="muted" id="founder-role"></p>
-              <p id="founder-short-bio"></p>
-              <a class="button secondary" href="founder.html">Mehr uber den Grunder</a>
+      <section class="founder-hero card">
+        <div class="founder-layout">
+          <div class="founder-photo-wrap">
+            <img id="founder-photo-full" alt="Grunderfoto" loading="lazy" />
+          </div>
+          <div class="founder-info">
+            <h1 id="founder-name-full" class="section-title" style="margin-bottom: 6px"></h1>
+            <p class="muted" id="founder-role-full"></p>
+            <p id="founder-full-bio" style="margin-top: 16px"></p>
+            <div class="founder-links">
+              <a id="founder-email-link" class="contact-link" href="#" target="_blank" rel="noreferrer"></a>
+              <a id="founder-linkedin-link" class="contact-link" href="#" target="_blank" rel="noreferrer"></a>
             </div>
           </div>
-        </article>
+        </div>
       </section>
     </main>
 
@@ -59,3 +50,4 @@
     <script src="main.js"></script>
   </body>
 </html>
+

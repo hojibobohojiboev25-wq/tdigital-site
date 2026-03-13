@@ -10,6 +10,6 @@ module.exports = async function handler(req, res) {
     const content = await getContent();
     return sendJson(res, 200, { content });
   } catch (error) {
-    return sendJson(res, 500, { error: "Failed to load content.", details: error.message });
+    return sendJson(res, 500, { error: "Failed to load content." });
   }
 };
