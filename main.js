@@ -230,6 +230,14 @@ function renderAbout(content) {
         linkedInLink.style.display = "none";
       }
     }
+
+    const founderDetailsEl = document.getElementById("founder-details");
+    if (founderDetailsEl && Array.isArray(founder.details)) {
+      const rows = founder.details.filter((d) => d.label || d.value);
+      founderDetailsEl.innerHTML = rows.length
+        ? rows.map((d) => `<div class="project-detail-row"><span class="project-detail-label">${escapeHtml(d.label || "")}</span><span class="project-detail-value">${escapeHtml(d.value || "")}</span></div>`).join("")
+        : "";
+    }
   }
 }
 
@@ -524,7 +532,29 @@ function setupOrderForm() {
   });
 }
 
+function injectBgSequenceAnimations() {
+  if (document.body.dataset.adminPage || document.querySelector(".admin-shell")) return;
+  if (document.getElementById("bg-strip-bottom")) return;
+  const stripBottom = document.createElement("div");
+  stripBottom.id = "bg-strip-bottom";
+  stripBottom.className = "bg-strip-bottom";
+  stripBottom.setAttribute("aria-hidden", "true");
+  const robot = document.createElement("div");
+  robot.id = "bg-robot";
+  robot.className = "bg-robot";
+  robot.setAttribute("aria-hidden", "true");
+  robot.innerHTML = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="8" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="8.5" cy="13" r="1.5" fill="currentColor"/><circle cx="15.5" cy="13" r="1.5" fill="currentColor"/><path d="M9 18h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 2v4M10 4h4" stroke="currentColor" stroke-width="1.5"/></svg>';
+  const stripVertical = document.createElement("div");
+  stripVertical.id = "bg-strip-vertical";
+  stripVertical.className = "bg-strip-vertical";
+  stripVertical.setAttribute("aria-hidden", "true");
+  document.body.appendChild(stripBottom);
+  document.body.appendChild(robot);
+  document.body.appendChild(stripVertical);
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
+  injectBgSequenceAnimations();
   setupMenuToggle();
   setActiveNav();
   setupRevealAnimations();

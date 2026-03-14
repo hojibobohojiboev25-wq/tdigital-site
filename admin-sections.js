@@ -93,6 +93,38 @@ function initHomePage(state, saveContent) {
   });
 }
 
+function renderFounderDetailRows(container, details) {
+  if (!container) return;
+  container.innerHTML = "";
+  const list = Array.isArray(details) ? details.map((d) => ({ label: d.label || "", value: d.value || "" })) : [];
+  list.forEach((row, rowIndex) => {
+    const rowWrap = document.createElement("div");
+    rowWrap.className = "detail-row";
+    const labelInput = createInput("Bezeichnung", row.label);
+    const valueInput = createInput("Wert", row.value);
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "button ghost";
+    delBtn.textContent = "Entfernen";
+    delBtn.addEventListener("click", () => {
+      list.splice(rowIndex, 1);
+      renderFounderDetailRows(container, list);
+    });
+    rowWrap.append(labelInput.label, valueInput.label, delBtn);
+    rowWrap._labelInput = labelInput.input;
+    rowWrap._valueInput = valueInput.input;
+    container.appendChild(rowWrap);
+  });
+}
+
+function getFounderDetailsFromRows(container) {
+  if (!container) return [];
+  return Array.from(container.children).map((row) => ({
+    label: (row._labelInput && row._labelInput.value.trim()) || "",
+    value: (row._valueInput && row._valueInput.value.trim()) || ""
+  }));
+}
+
 function initAboutPage(state, saveContent) {
   const form = document.getElementById("aboutForm");
   const status = document.getElementById("status");
@@ -105,6 +137,8 @@ function initAboutPage(state, saveContent) {
   const founderPhotoUrl = document.getElementById("founderPhotoUrl");
   const founderLinkedIn = document.getElementById("founderLinkedIn");
   const founderEmail = document.getElementById("founderEmail");
+  const founderDetailsRows = document.getElementById("founderDetailsRows");
+  const addFounderDetail = document.getElementById("addFounderDetail");
 
   const founder = (state.about && state.about.founder) || {};
 
@@ -117,6 +151,15 @@ function initAboutPage(state, saveContent) {
   if (founderPhotoUrl) founderPhotoUrl.value = founder.photoUrl || "";
   if (founderLinkedIn) founderLinkedIn.value = founder.linkedin || "";
   if (founderEmail) founderEmail.value = founder.email || "";
+  renderFounderDetailRows(founderDetailsRows, founder.details);
+
+  if (addFounderDetail && founderDetailsRows) {
+    addFounderDetail.addEventListener("click", () => {
+      const list = getFounderDetailsFromRows(founderDetailsRows);
+      list.push({ label: "", value: "" });
+      renderFounderDetailRows(founderDetailsRows, list);
+    });
+  }
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -132,7 +175,8 @@ function initAboutPage(state, saveContent) {
           fullBio: founderFullBio.value.trim(),
           photoUrl: founderPhotoUrl.value.trim(),
           linkedin: founderLinkedIn.value.trim(),
-          email: founderEmail.value.trim()
+          email: founderEmail.value.trim(),
+          details: founderDetailsRows ? getFounderDetailsFromRows(founderDetailsRows) : []
         }
       }
     };

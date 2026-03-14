@@ -36,7 +36,8 @@ const defaultContent = {
         "Ausführlicher Text über den Gründer: Hintergrund, Erfahrung und Vision für OrzuIT und die Unterstützung kleiner Unternehmen.",
       photoUrl: "https://images.pexels.com/photos/1181519/pexels-photo-1181519.jpeg",
       linkedin: "",
-      email: ""
+      email: "",
+      details: []
     }
   },
   contacts: {
@@ -69,7 +70,8 @@ function normalizeContent(parsed) {
       ...parsedAbout,
       founder: {
         ...defaultContent.about.founder,
-        ...parsedFounder
+        ...parsedFounder,
+        details: Array.isArray(parsedFounder.details) ? parsedFounder.details : []
       }
     },
     contacts: { ...defaultContent.contacts, ...((parsed && parsed.contacts) || {}) },

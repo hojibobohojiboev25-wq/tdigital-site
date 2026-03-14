@@ -207,6 +207,70 @@ body::after {
   animation: scanLine 6s linear infinite;
 }
 
+/* One-time background sequence: strip bottom → robot left→right → strip vertical (no delay) */
+@keyframes stripBottom {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+@keyframes robotMove {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(120vw); }
+}
+
+@keyframes stripVertical {
+  0% { top: -4px; opacity: 1; }
+  100% { top: 100%; opacity: 1; }
+}
+
+.bg-strip-bottom {
+  position: fixed;
+  bottom: 0;
+  left: -100%;
+  width: 80%;
+  max-width: 400px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  box-shadow: 0 0 20px var(--accent);
+  pointer-events: none;
+  z-index: 0;
+  animation: stripBottom 3s linear 0s forwards;
+}
+
+.bg-robot {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%) translateX(-120%);
+  width: 56px;
+  height: 56px;
+  pointer-events: none;
+  z-index: 0;
+  color: var(--accent);
+  animation: robotMove 8s linear 3s forwards;
+}
+
+.bg-robot svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 12px rgba(0, 245, 255, 0.6));
+}
+
+.bg-strip-vertical {
+  position: fixed;
+  left: 50%;
+  top: -4px;
+  width: 2px;
+  height: 4px;
+  margin-left: -1px;
+  background: linear-gradient(180deg, var(--accent), transparent);
+  box-shadow: 0 0 15px var(--accent);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  animation: stripVertical 5s linear 11s forwards;
+}
+
 .container {
   width: min(1140px, 92%);
   margin: 0 auto;
@@ -668,6 +732,16 @@ main {
 
 .project-card-actions .button {
   margin-top: 0;
+}
+
+.founder-details-list {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(0, 245, 255, 0.12);
+}
+
+.founder-details-list .project-detail-row {
+  padding: 12px 0;
 }
 
 .card h3 {
