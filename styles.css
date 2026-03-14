@@ -71,6 +71,11 @@
   }
 }
 
+@keyframes menuCircleIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @keyframes glowPulse {
   0%, 100% { box-shadow: 0 0 20px rgba(0, 245, 255, 0.3); }
   50% { box-shadow: 0 0 35px rgba(0, 245, 255, 0.5); }
@@ -112,6 +117,29 @@
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+/* Order success overlay - delivery animation */
+@keyframes deliveryShip {
+  0% { left: 12%; opacity: 0.6; transform: translateY(-50%) scale(0.8); }
+  15% { opacity: 1; transform: translateY(-50%) scale(1); }
+  85% { opacity: 1; transform: translateY(-50%) scale(1); }
+  100% { left: 88%; opacity: 0.6; transform: translateY(-50%) scale(0.8); }
+}
+
+@keyframes orderSuccessIn {
+  from { opacity: 0; transform: scale(0.9); filter: blur(8px); }
+  to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+@keyframes orderMessageIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(0, 245, 255, 0.4); }
+  50% { box-shadow: 0 0 40px rgba(0, 245, 255, 0.7); }
 }
 
 body {
@@ -234,28 +262,39 @@ body::after {
   white-space: nowrap;
 }
 
+.menu-wrap {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  position: relative;
+}
+
 .nav {
   display: flex;
   gap: 4px;
   flex-wrap: wrap;
 }
 
-/* Futuristic menu button - hamburger to X */
+/* Round menu button - top right, hamburger to X */
 .menu-toggle {
   display: none;
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border: 1px solid var(--card-border);
-  background: rgba(0, 245, 255, 0.05);
-  border-radius: var(--radius-sm);
+  background: rgba(0, 245, 255, 0.06);
+  border-radius: 50%;
   padding: 0;
   cursor: pointer;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
-  box-shadow: 0 0 20px rgba(0, 245, 255, 0.1);
+  transition: border-color 0.3s, box-shadow 0.3s, background 0.3s, transform 0.2s;
+  box-shadow: 0 0 25px rgba(0, 245, 255, 0.12);
+}
+
+.menu-toggle:active {
+  transform: scale(0.96);
 }
 
 .menu-toggle:hover {
@@ -714,6 +753,120 @@ main {
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
+/* Order success full-screen overlay */
+.order-success-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s var(--ease), visibility 0.4s;
+}
+
+.order-success-overlay.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.order-success-backdrop {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 50% at 50% 50%, rgba(0, 245, 255, 0.06), transparent 70%),
+    rgba(6, 8, 16, 0.92);
+  backdrop-filter: blur(14px);
+  cursor: pointer;
+  animation: orderBackdropPulse 4s ease-in-out infinite;
+}
+
+@keyframes orderBackdropPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.97; }
+}
+
+.order-success-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 480px;
+  padding: 40px 32px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: 0 0 60px rgba(0, 245, 255, 0.2), inset 0 1px 0 rgba(255,255,255,0.04);
+  animation: orderSuccessIn 0.5s var(--ease) both;
+}
+
+.order-success-track {
+  position: relative;
+  height: 4px;
+  margin: 0 0 48px;
+  background: linear-gradient(90deg, rgba(0, 245, 255, 0.2), rgba(168, 85, 247, 0.2));
+  border-radius: 2px;
+  overflow: visible;
+}
+
+.order-success-point {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  transform: translateY(-50%);
+  box-shadow: 0 0 20px var(--accent);
+}
+
+.order-success-point-a { left: 0; transform: translate(-50%, -50%); animation: pulseGlow 1.5s ease-in-out infinite; }
+.order-success-point-b { left: 100%; transform: translate(50%, -50%); animation: pulseGlow 1.5s ease-in-out 0.5s infinite; }
+
+.order-success-ship {
+  position: absolute;
+  top: 50%;
+  left: 12%;
+  width: 48px;
+  height: 48px;
+  color: var(--accent);
+  transform: translateY(-50%);
+  animation: deliveryShip 2.2s var(--ease) 0.3s both;
+  filter: drop-shadow(0 0 12px var(--accent));
+}
+
+.order-success-ship svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.order-success-message {
+  animation: orderMessageIn 0.6s var(--ease) 2.2s both;
+}
+
+.order-success-title {
+  margin: 0 0 12px;
+  font-family: "Orbitron", sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-shadow: 0 0 30px rgba(0, 245, 255, 0.5);
+  letter-spacing: 0.02em;
+}
+
+.order-success-subtitle {
+  margin: 0 0 24px;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.order-success-close {
+  margin-top: 0;
+}
+
 .contact-link {
   color: var(--accent);
   text-decoration: none;
@@ -762,50 +915,55 @@ main {
     padding: 28px 20px;
   }
 
-  .menu-toggle {
-    display: flex;
-    margin-left: auto;
+  .menu-wrap {
+    overflow: visible;
   }
 
-  .nav {
+  .menu-toggle {
     display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-height: 0;
-    margin-top: 0;
-    overflow: hidden;
+  }
+
+  /* Circular menu - items in a circle around the round button */
+  .nav {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 240px;
+    height: 240px;
+    margin: 0;
+    transform: translate(50%, -50%);
+    pointer-events: none;
     opacity: 0;
-    background: rgba(6, 8, 16, 0.95);
-    border: 1px solid transparent;
-    border-radius: var(--radius-sm);
-    padding: 0 10px;
-    box-shadow: none;
-    transition: max-height 0.4s var(--ease), opacity 0.35s var(--ease), margin-top 0.35s, border-color 0.3s, padding 0.3s, box-shadow 0.3s;
+    transition: opacity 0.35s var(--ease);
   }
 
   .nav.is-open {
-    max-height: 320px;
+    pointer-events: auto;
     opacity: 1;
-    margin-top: 12px;
-    padding: 10px;
-    border-color: var(--card-border);
-    box-shadow: 0 0 40px rgba(0, 245, 255, 0.15);
   }
-
-  .nav.is-open a {
-    animation: menuItemIn 0.35s var(--ease) both;
-  }
-
-  .nav.is-open a:nth-child(1) { animation-delay: 0.05s; }
-  .nav.is-open a:nth-child(2) { animation-delay: 0.1s; }
-  .nav.is-open a:nth-child(3) { animation-delay: 0.15s; }
-  .nav.is-open a:nth-child(4) { animation-delay: 0.2s; }
-  .nav.is-open a:nth-child(5) { animation-delay: 0.25s; }
 
   .nav a {
-    width: 100%;
-    border-radius: 8px;
-    padding: 12px 14px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: auto;
+    white-space: nowrap;
+    padding: 10px 16px;
+    border-radius: 999px;
+    transform: rotate(var(--angle, 0deg)) translateY(-95px) rotate(calc(-1 * var(--angle, 0deg)));
+    opacity: 0;
+    transition: opacity 0.25s var(--ease), box-shadow 0.2s, transform 0.35s var(--ease);
+    animation: menuCircleIn 0.4s var(--ease) both;
+  }
+
+  .nav.is-open a:nth-child(1) { --angle: 0deg;   animation-delay: 0.05s; }
+  .nav.is-open a:nth-child(2) { --angle: 72deg;  animation-delay: 0.1s; }
+  .nav.is-open a:nth-child(3) { --angle: 144deg; animation-delay: 0.15s; }
+  .nav.is-open a:nth-child(4) { --angle: 216deg; animation-delay: 0.2s; }
+  .nav.is-open a:nth-child(5) { --angle: 288deg; animation-delay: 0.25s; }
+
+  .nav a:hover {
+    box-shadow: 0 0 25px rgba(0, 245, 255, 0.35);
   }
 
   .founder-layout {

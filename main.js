@@ -332,6 +332,46 @@ function setupOrderForm() {
     statusEl.className = "order-status " + (isError ? "order-status-error" : "order-status-ok");
   }
 
+  function showOrderSuccessScreen() {
+    const overlay = document.createElement("div");
+    overlay.className = "order-success-overlay";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", "Anfrage zugestellt");
+    overlay.innerHTML = `
+      <div class="order-success-backdrop"></div>
+      <div class="order-success-content">
+        <div class="order-success-track">
+          <div class="order-success-point order-success-point-a" aria-hidden="true"></div>
+          <div class="order-success-ship" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M24 4L8 14v20l16 10 16-10V14L24 4z" stroke="currentColor" stroke-width="2" fill="rgba(0,245,255,0.15)"/>
+              <path d="M24 8l-10 6v12l10 6 10-6V14L24 8z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+              <circle cx="24" cy="20" r="3" fill="currentColor"/>
+            </svg>
+          </div>
+          <div class="order-success-point order-success-point-b" aria-hidden="true"></div>
+        </div>
+        <div class="order-success-message">
+          <h2 class="order-success-title">Anfrage zugestellt</h2>
+          <p class="order-success-subtitle">Wir melden uns innerhalb von 3 Werktagen bei Ihnen.</p>
+          <button type="button" class="button order-success-close">Schließen</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add("is-visible"));
+
+    const close = () => {
+      overlay.classList.remove("is-visible");
+      setTimeout(() => overlay.remove(), 400);
+    };
+
+    overlay.querySelector(".order-success-close").addEventListener("click", close);
+    overlay.querySelector(".order-success-backdrop").addEventListener("click", close);
+    overlay.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const name = (document.getElementById("order-name") && document.getElementById("order-name").value) || "";
@@ -348,8 +388,9 @@ function setupOrderForm() {
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.ok) {
-        setStatus("Anfrage wurde gesendet. Wir melden uns bei Ihnen.", false);
+        setStatus("Anfrage wurde gesendet.", false);
         form.reset();
+        showOrderSuccessScreen();
       } else {
         setStatus(data.error || "Senden fehlgeschlagen.", true);
       }
