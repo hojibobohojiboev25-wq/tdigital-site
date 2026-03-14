@@ -517,6 +517,73 @@ main {
   font-weight: 500;
 }
 
+/* Order / Anfrage form */
+.order-section {
+  margin-top: 40px;
+}
+
+.order-form {
+  display: grid;
+  gap: 16px;
+  max-width: 520px;
+}
+
+.order-form label {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.order-form input,
+.order-form textarea {
+  width: 100%;
+  margin-top: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 1rem;
+  background: var(--card);
+  transition: border-color 0.2s;
+}
+
+.order-form input:focus,
+.order-form textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.order-form textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.order-form .row-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.order-status {
+  font-size: 0.875rem;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.order-status-ok {
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+}
+
+.order-status-error {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
 .contact-link {
   color: var(--accent);
   text-decoration: none;

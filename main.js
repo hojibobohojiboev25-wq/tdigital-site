@@ -322,10 +322,48 @@ function applyCommon(content) {
   });
 }
 
+function setupOrderForm() {
+  const form = document.getElementById("order-form");
+  const statusEl = document.getElementById("order-status");
+  if (!form || !statusEl) return;
+
+  function setStatus(text, isError) {
+    statusEl.textContent = text;
+    statusEl.className = "order-status " + (isError ? "order-status-error" : "order-status-ok");
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = (document.getElementById("order-name") && document.getElementById("order-name").value) || "";
+    const email = (document.getElementById("order-email") && document.getElementById("order-email").value) || "";
+    const phone = (document.getElementById("order-phone") && document.getElementById("order-phone").value) || "";
+    const message = (document.getElementById("order-message") && document.getElementById("order-message").value) || "";
+    setStatus("Wird gesendet…", false);
+
+    try {
+      const res = await fetch("/api/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, phone, message })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok) {
+        setStatus("Anfrage wurde gesendet. Wir melden uns bei Ihnen.", false);
+        form.reset();
+      } else {
+        setStatus(data.error || "Senden fehlgeschlagen.", true);
+      }
+    } catch (err) {
+      setStatus("Netzwerkfehler. Bitte später erneut versuchen.", true);
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   setupMenuToggle();
   setActiveNav();
   setupRevealAnimations();
+  setupOrderForm();
 
   const { getContent } = window.TDigitalContent;
   const content = await getContent();
