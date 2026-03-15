@@ -291,33 +291,56 @@ function createContactValueMarkup(type, value) {
   return `<span>${value}</span>`;
 }
 
+function applyProjectsFilter() {
+  const list = document.getElementById("projects-list");
+  const categorySelect = document.getElementById("project-category-filter");
+  const numberInput = document.getElementById("project-number-search");
+  if (!list) return;
+  const categoryVal = (categorySelect && categorySelect.value) || "";
+  const numberVal = (numberInput && numberInput.value.trim()) || "";
+  list.querySelectorAll(".project-card").forEach((card) => {
+    const catMatch = !categoryVal || (card.dataset.categoryId === categoryVal);
+    const numMatch = !numberVal || (card.dataset.projectNumber || "").indexOf(numberVal) !== -1;
+    card.style.display = catMatch && numMatch ? "" : "none";
+  });
+}
+
 function renderProjects(content) {
   const list = document.getElementById("projects-list");
   const filterWrap = document.getElementById("projects-filter");
   const categories = content.projectCategories || [];
   const projects = content.projects || [];
 
-  if (filterWrap && categories.length > 0) {
+  if (filterWrap) {
     filterWrap.innerHTML = "";
-    const label = document.createElement("label");
-    label.textContent = "Kategorie: ";
-    const select = document.createElement("select");
-    select.id = "project-category-filter";
-    select.innerHTML = "<option value=\"\">Alle</option>";
-    categories.forEach((c) => {
-      const opt = document.createElement("option");
-      opt.value = c.id || "";
-      opt.textContent = c.name || "";
-      select.appendChild(opt);
-    });
-    label.appendChild(select);
-    filterWrap.appendChild(label);
-    select.addEventListener("change", () => {
-      const val = select.value;
-      list.querySelectorAll(".project-card").forEach((card) => {
-        card.style.display = !val || (card.dataset.categoryId === val) ? "" : "none";
+    const searchLabel = document.createElement("label");
+    searchLabel.textContent = "Projektnummer suchen: ";
+    const numberInput = document.createElement("input");
+    numberInput.type = "text";
+    numberInput.id = "project-number-search";
+    numberInput.placeholder = "z. B. 10001";
+    numberInput.autocomplete = "off";
+    searchLabel.appendChild(numberInput);
+    filterWrap.appendChild(searchLabel);
+    numberInput.addEventListener("input", applyProjectsFilter);
+    numberInput.addEventListener("change", applyProjectsFilter);
+
+    if (categories.length > 0) {
+      const catLabel = document.createElement("label");
+      catLabel.textContent = "Kategorie: ";
+      const select = document.createElement("select");
+      select.id = "project-category-filter";
+      select.innerHTML = "<option value=\"\">Alle</option>";
+      categories.forEach((c) => {
+        const opt = document.createElement("option");
+        opt.value = c.id || "";
+        opt.textContent = c.name || "";
+        select.appendChild(opt);
       });
-    });
+      catLabel.appendChild(select);
+      filterWrap.appendChild(catLabel);
+      select.addEventListener("change", applyProjectsFilter);
+    }
   }
 
   if (!list) return;
@@ -349,6 +372,7 @@ function createProjectCard(project, isFeatured = false, categories = []) {
   const item = document.createElement("article");
   item.className = isFeatured ? "project-card featured-card" : "card project-card";
   item.dataset.categoryId = project.categoryId || "";
+  item.dataset.projectNumber = (project.number || "").trim();
 
   const linkUrl = normalizeExternalUrl(project.link);
   const domain = getDomainFromUrl(linkUrl);

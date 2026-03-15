@@ -746,6 +746,10 @@ main {
 
 .projects-filter {
   margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 24px;
 }
 
 .projects-filter label {
@@ -756,6 +760,7 @@ main {
   color: var(--muted);
 }
 
+.projects-filter input,
 .projects-filter select {
   padding: 8px 12px;
   border: 1px solid var(--card-border);
@@ -763,6 +768,17 @@ main {
   background: rgba(0, 0, 0, 0.25);
   color: var(--text);
   font: inherit;
+}
+
+.projects-filter input:focus,
+.projects-filter select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(0, 245, 255, 0.15);
+}
+
+.projects-filter input {
+  min-width: 120px;
 }
 
 .project-detail-number {
