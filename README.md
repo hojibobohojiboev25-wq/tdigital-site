@@ -33,6 +33,13 @@ You can use `.env.example` as reference. Telegram can also be configured in **Ad
 - Login: `/admin-login.html`
 - Dashboard: `/admin.html`
 
+## Production readiness
+
+- **Rate limiting**: Login (10/15 min), order (20/min), content (60/min) by IP; state in DB (`rate_limits` table).
+- **Validation**: Centralized in `api/_lib/validate.js` for login, order, content, credentials, Telegram, bootstrap; API returns `{ error, details }` on validation failure.
+- **Logging**: `api/_lib/logger.js` (info, warn, error) to stdout; set `LOG_LEVEL` (debug|info|warn|error) if needed.
+- **ORM**: All DB access via `api/_lib/models` (Admin, SiteContent, Order, TelegramSettings); raw SQL only in `api/_lib/db.js` for init and in models.
+
 ## Notes
 
 - Content is stored in DB and shared across all devices.

@@ -1,3 +1,12 @@
+function getClientIp(req) {
+  const forwarded = req.headers && (req.headers["x-forwarded-for"] || req.headers["x-real-ip"]);
+  if (forwarded) {
+    const first = typeof forwarded === "string" ? forwarded.split(",")[0] : forwarded[0];
+    return (first && first.trim()) || "unknown";
+  }
+  return (req.socket && req.socket.remoteAddress) || "unknown";
+}
+
 function sendJson(res, statusCode, payload) {
   res.statusCode = statusCode;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -23,6 +32,7 @@ async function readJson(req) {
 }
 
 module.exports = {
+  getClientIp,
   sendJson,
   readJson
 };

@@ -1,6 +1,8 @@
 const bcrypt = require("bcryptjs");
-const { getPrimaryAdmin, updateAdminCredentials } = require("../_lib/db");
-const { sendJson, readJson } = require("../_lib/http");
+const { Admin } = require("../_lib/models");
+const { sendJson, readJson, getClientIp } = require("../_lib/http");
+const { validateBootstrap } = require("../_lib/validate");
+const logger = require("../_lib/logger");
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
@@ -19,24 +21,30 @@ module.exports = async function handler(req, res) {
     return sendJson(res, 400, { error: "Invalid JSON payload." });
   }
 
-  const secret = String(body.secret || "");
-  const username = String(body.username || "").trim();
-  const password = String(body.password || "");
+  const validation = validateBootstrap(body);
+  if (!validation.valid) {
+    return sendJson(res, 400, { error: "Validation failed.", details: validation.errors });
+  }
+
+  const { secret, username, password } = validation.data;
 
   if (secret !== bootstrapSecret) {
+    logger.warn("Bootstrap invalid secret", { ip: getClientIp(req) });
     return sendJson(res, 401, { error: "Invalid secret." });
   }
-  if (!username || password.length < 6) {
-    return sendJson(res, 400, { error: "Username is required and password must be at least 6 characters." });
-  }
 
-  const admin = await getPrimaryAdmin();
-  if (!admin) {
-    return sendJson(res, 500, { error: "Admin record not found." });
-  }
+  try {
+    const admin = await Admin.getPrimary();
+    if (!admin) {
+      return sendJson(res, 500, { error: "Admin record not found." });
+    }
 
-  const hash = await bcrypt.hash(password, 12);
-  const updated = await updateAdminCredentials(admin.id, username, hash);
-  return sendJson(res, 200, { success: true, user: updated });
+    const hash = await bcrypt.hash(password, 12);
+    const updated = await Admin.updateCredentials(admin.id, username, hash);
+    logger.info("Bootstrap: admin credentials reset", { adminId: admin.id, ip: getClientIp(req) });
+    return sendJson(res, 200, { success: true, user: updated });
+  } catch (error) {
+    logger.error("Bootstrap failed", { message: error.message });
+    return sendJson(res, 500, { error: "Bootstrap failed." });
+  }
 };
-

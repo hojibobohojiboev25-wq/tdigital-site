@@ -1,6 +1,7 @@
-const { getAdminById } = require("../_lib/db");
+const { Admin } = require("../_lib/models");
 const { verifyAdminToken } = require("../_lib/auth");
 const { sendJson } = require("../_lib/http");
+const logger = require("../_lib/logger");
 
 module.exports = async function handler(req, res) {
   if (req.method !== "GET") {
@@ -13,17 +14,15 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const admin = await getAdminById(payload.sub);
+    const admin = await Admin.findById(payload.sub);
     if (!admin) {
       return sendJson(res, 401, { error: "Unauthorized." });
     }
     return sendJson(res, 200, {
-      user: {
-        id: admin.id,
-        username: admin.username
-      }
+      user: { id: admin.id, username: admin.username }
     });
   } catch (error) {
+    logger.error("Auth me failed", { message: error.message });
     return sendJson(res, 500, { error: "Auth check failed." });
   }
 };

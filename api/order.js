@@ -1,11 +1,14 @@
-const { getTelegramSettings, saveOrder } = require("./_lib/db");
-const { sendJson, readJson } = require("./_lib/http");
+const { Order, TelegramSettings } = require("./_lib/models");
+const { sendJson, readJson, getClientIp } = require("./_lib/http");
+const { validateOrder } = require("./_lib/validate");
+const rateLimit = require("./_lib/rateLimit");
+const logger = require("./_lib/logger");
 
 async function getTelegramCredentials() {
   const chatId = process.env.TELEGRAM_CHAT_ID || null;
   const botToken = process.env.TELEGRAM_BOT_TOKEN || null;
   if (chatId && botToken) return { chatId, botToken };
-  const settings = await getTelegramSettings();
+  const settings = await TelegramSettings.get();
   return { chatId: settings.chatId, botToken: settings.botToken };
 }
 
@@ -17,12 +20,12 @@ function escapeHtml(s) {
     .replace(/>/g, "&gt;");
 }
 
-function buildOrderMessage(body) {
-  const name = escapeHtml(String(body.name || "").trim());
-  const email = escapeHtml(String(body.email || "").trim());
-  const phone = escapeHtml(String(body.phone || "").trim());
-  const service = escapeHtml(String(body.service || "").trim());
-  const message = escapeHtml(String(body.message || "").trim());
+function buildOrderMessage(data) {
+  const name = escapeHtml(String(data.name || "").trim());
+  const email = escapeHtml(String(data.email || "").trim());
+  const phone = escapeHtml(String(data.phone || "").trim());
+  const service = escapeHtml(String(data.service || "").trim());
+  const message = escapeHtml(String(data.message || "").trim());
   const lines = ["🆕 <b>Neue Anfrage / Bestellung</b>", ""];
   if (service) lines.push("<b>Leistung:</b> " + service);
   if (name) lines.push("<b>Name:</b> " + name);
@@ -37,29 +40,34 @@ module.exports = async function handler(req, res) {
     return sendJson(res, 405, { error: "Method not allowed." });
   }
 
+  if (await rateLimit.check(req, res, "order")) return;
+
   let body = {};
   try {
     body = await readJson(req);
   } catch {
+    logger.warn("Order invalid JSON", { ip: getClientIp(req) });
     return sendJson(res, 400, { error: "Ungültige Daten." });
   }
 
-  const name = String(body.name || "").trim();
-  const email = String(body.email || "").trim();
-  const message = String(body.message || "").trim();
-  if (!message && !name && !email) {
-    return sendJson(res, 400, { error: "Bitte Name, E-Mail oder Nachricht angeben." });
+  const validation = validateOrder(body);
+  if (!validation.valid) {
+    return sendJson(res, 400, { error: "Validation failed.", details: validation.errors });
   }
 
+  const data = validation.data;
+
   try {
-    await saveOrder(body);
+    const order = await Order.create(data);
+    logger.info("Order created", { orderId: order.id, ip: getClientIp(req) });
   } catch (err) {
+    logger.error("Order save failed", { message: err.message, ip: getClientIp(req) });
     return sendJson(res, 500, { error: "Bestellung konnte nicht gespeichert werden." });
   }
 
   const { chatId, botToken } = await getTelegramCredentials();
   if (chatId && botToken) {
-    const text = buildOrderMessage(body);
+    const text = buildOrderMessage(data);
     const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
     try {
       const response = await fetch(url, {
@@ -67,12 +75,12 @@ module.exports = async function handler(req, res) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ chat_id: chatId, text, parse_mode: "HTML" })
       });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data.ok) {
-        // Order already saved; log but don't fail
+      const respData = await response.json().catch(() => ({}));
+      if (!response.ok || !respData.ok) {
+        logger.warn("Telegram send failed", { orderId: data.id });
       }
-    } catch {
-      // Order already saved
+    } catch (e) {
+      logger.warn("Telegram request error", { message: e.message });
     }
   }
 

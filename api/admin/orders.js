@@ -1,6 +1,7 @@
-const { getOrders, getAdminById } = require("../_lib/db");
+const { Order, Admin } = require("../_lib/models");
 const { verifyAdminToken } = require("../_lib/auth");
 const { sendJson } = require("../_lib/http");
+const logger = require("../_lib/logger");
 
 module.exports = async function handler(req, res) {
   const payload = verifyAdminToken(req);
@@ -8,7 +9,7 @@ module.exports = async function handler(req, res) {
     return sendJson(res, 401, { error: "Unauthorized." });
   }
 
-  const admin = await getAdminById(payload.sub);
+  const admin = await Admin.findById(payload.sub);
   if (!admin) {
     return sendJson(res, 401, { error: "Unauthorized." });
   }
@@ -18,9 +19,10 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const orders = await getOrders();
+    const orders = await Order.findAll();
     return sendJson(res, 200, { orders });
   } catch (error) {
+    logger.error("Orders fetch failed", { message: error.message });
     return sendJson(res, 500, { error: "Failed to load orders." });
   }
 };
