@@ -7,7 +7,7 @@ const defaultContent = {
     intro:
       "Wir helfen kleinen Unternehmen, moderne digitale Lösungen zu starten. Wir liefern hohe Qualität, durchdachtes UX und zuverlässige Begleitung in jeder Projektphase.",
     ctaText: "Leistungen ansehen",
-    ctaLink: "services.html"
+    ctaLink: "/services"
   },
   services: [
     {

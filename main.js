@@ -78,7 +78,7 @@ function renderServices(content) {
   services.forEach((service) => {
     const title = (service.title || "").trim() || "Leistung";
     const desc = service.description || "";
-    const detailUrl = "service.html?title=" + encodeURIComponent(title);
+    const detailUrl = "/service?title=" + encodeURIComponent(title);
     const orderUrl = "contacts.html?service=" + encodeURIComponent(title) + "#order-section";
     const item = document.createElement("article");
     item.className = "card service-card";
@@ -104,7 +104,7 @@ function renderServiceDetailPage(content) {
   if (!service) {
     block.innerHTML = `
       <p class="service-detail-notfound">Leistung nicht gefunden.</p>
-      <a class="button" href="services.html">Alle Leistungen</a>
+      <a class="button" href="/services">Alle Leistungen</a>
     `;
     document.title = "Leistung nicht gefunden - " + (content.siteName || "OrzuIT");
     return;
@@ -113,11 +113,11 @@ function renderServiceDetailPage(content) {
   const description = service.description || "";
   const details = service.details != null ? String(service.details) : "";
   block.innerHTML = `
-    <a class="service-detail-back" href="services.html">← Leistungen</a>
+    <a class="service-detail-back" href="/services">← Leistungen</a>
     <h1 class="service-detail-title">${escapeHtml(title)}</h1>
     ${description ? `<p class="service-detail-lead">${escapeHtml(description)}</p>` : ""}
     <div class="service-detail-body">${details ? escapeHtml(details).replace(/\n/g, "<br>") : "<p class=\"muted\">Keine weiteren Details.</p>"}</div>
-    <a class="button" href="contacts.html?service=${encodeURIComponent(title)}#order-section">Jetzt anfragen</a>
+    <a class="button" href="/contacts?service=${encodeURIComponent(title)}#order-section">Jetzt anfragen</a>
   `;
   document.title = title + " - " + (content.siteName || "OrzuIT");
 }
@@ -132,7 +132,7 @@ function renderProjectDetailPage(content) {
   if (!project) {
     block.innerHTML = `
       <p class="service-detail-notfound">Projekt nicht gefunden.</p>
-      <a class="button" href="projects.html">Alle Projekte</a>
+      <a class="button" href="/projects">Alle Projekte</a>
     `;
     document.title = "Projekt nicht gefunden - " + (content.siteName || "OrzuIT");
     return;
@@ -147,13 +147,13 @@ function renderProjectDetailPage(content) {
   const projectNumber = (project.number || "").trim();
   const projectLinkUrl = normalizeExternalUrl(project.link);
   const orderBtn = projectNumber
-    ? `<a class="button" href="contacts.html?project=${encodeURIComponent(projectNumber)}#order-section">Bestellen</a>`
+    ? `<a class="button" href="/contacts?project=${encodeURIComponent(projectNumber)}#order-section">Bestellen</a>`
     : "";
   const openBtn = projectLinkUrl
     ? `<a class="button secondary" href="${escapeHtml(projectLinkUrl)}" target="_blank" rel="noreferrer">Projekt öffnen</a>`
     : "";
   block.innerHTML = `
-    <a class="service-detail-back" href="projects.html">← Projekte</a>
+    <a class="service-detail-back" href="/projects">← Projekte</a>
     <h1 class="service-detail-title">${escapeHtml(name)}</h1>
     ${projectNumber ? `<p class="project-detail-number muted">Projektnummer: ${escapeHtml(projectNumber)}</p>` : ""}
     ${description ? `<p class="service-detail-lead">${escapeHtml(description)}</p>` : ""}
@@ -443,7 +443,7 @@ function createProjectCard(project, isFeatured = false, categories = []) {
   detailLink.className = "button secondary";
   detailLink.textContent = "Mehr erfahren";
   const projectName = (project.name || "").trim() || "Projekt";
-  detailLink.href = "project.html?name=" + encodeURIComponent(projectName);
+  detailLink.href = "/project?name=" + encodeURIComponent(projectName);
   actions.appendChild(detailLink);
   const orderLink = document.createElement("a");
   orderLink.className = "button";

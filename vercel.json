@@ -1,5 +1,5 @@
 {
   "framework": null,
-  "cleanUrls": false,
+  "cleanUrls": true,
   "trailingSlash": false
 }

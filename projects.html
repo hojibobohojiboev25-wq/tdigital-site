@@ -3,7 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OrzuIT - Projekte</title>
+    <title>Projekte – Referenzen | OrzuIT</title>
+    <meta name="description" content="Referenzprojekte von OrzuIT: realisierte Websites und Web-Anwendungen für kleine Unternehmen." />
+    <meta name="keywords" content="Projekte, Referenzen, Websites, Web-Apps, OrzuIT" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Projekte – OrzuIT" />
+    <meta property="og:description" content="Realisierte Projekte: Websites und Web-Apps von OrzuIT." />
+    <meta property="og:url" content="https://orzuit.de/projects" />
+    <meta property="og:image" content="https://i.imgur.com/qiFjcQR.jpeg" />
+    <meta property="og:site_name" content="OrzuIT" />
+    <meta property="og:locale" content="de_DE" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Projekte – OrzuIT" />
+    <meta name="twitter:description" content="Realisierte Projekte von OrzuIT." />
+    <meta name="twitter:image" content="https://i.imgur.com/qiFjcQR.jpeg" />
+    <link rel="canonical" href="https://orzuit.de/projects" />
     <link rel="preconnect" href="https://i.imgur.com" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,7 +28,7 @@
     <div class="scan-line" aria-hidden="true"></div>
     <header class="site-header">
       <div class="container header-row">
-        <a class="brand" href="index.html">
+        <a class="brand" href="/">
         <img class="brand-logo" src="https://i.imgur.com/qiFjcQR.jpeg" alt="" />
         <span data-site-name>OrzuIT</span>
       </a>
@@ -25,11 +39,11 @@
           <span class="menu-toggle-bar"></span>
         </button>
         <nav class="nav" id="main-nav">
-          <a data-nav href="index.html">Startseite</a>
-          <a data-nav href="services.html">Leistungen</a>
-          <a data-nav href="about.html">Uber uns</a>
-          <a data-nav href="contacts.html">Kontakt</a>
-          <a data-nav href="projects.html">Projekte</a>
+          <a data-nav href="/">Startseite</a>
+          <a data-nav href="/services">Leistungen</a>
+          <a data-nav href="/about">Über uns</a>
+          <a data-nav href="/contacts">Kontakt</a>
+          <a data-nav href="/projects">Projekte</a>
         </nav>
       </div>
       </div>
@@ -37,9 +51,16 @@
 
     <main class="container">
       <h1 class="section-title">Projekte</h1>
-      <p class="muted" style="margin-bottom: 16px">Bereich mit Ihren Projekten.</p>
-      <div id="projects-filter" class="projects-filter"></div>
-      <div class="grid" id="projects-list"></div>
+      <section class="projects-intro" aria-label="Projektübersicht">
+        <p class="muted" style="margin-bottom: 16px">Bereich mit Ihren Projekten.</p>
+      </section>
+      <section class="projects-filter-section" aria-label="Filter">
+        <div id="projects-filter" class="projects-filter"></div>
+      </section>
+      <section class="projects-list" aria-labelledby="projects-heading">
+        <h2 id="projects-heading" class="visually-hidden">Referenzprojekte</h2>
+        <div class="grid" id="projects-list"></div>
+      </section>
     </main>
 
     <footer class="site-footer">

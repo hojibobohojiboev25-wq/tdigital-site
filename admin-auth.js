@@ -36,14 +36,14 @@ async function isAdminAuthenticated() {
 }
 
 async function protectAdminRoute() {
-  const currentPage = location.pathname.split("/").pop() || "admin.html";
-  if (currentPage === "admin-login.html") return;
+  const currentPage = location.pathname.split("/").pop() || "admin";
+  if (currentPage === "admin-login") return;
 
   const authenticated = await isAdminAuthenticated();
   if (authenticated) return;
 
   clearToken();
-  location.replace(`admin-login.html?next=${encodeURIComponent(currentPage)}`);
+  location.replace(`/admin-login?next=${encodeURIComponent(currentPage)}`);
 }
 
 async function adminLogin(username, password) {
@@ -104,7 +104,7 @@ async function updateAdminCredentials(currentPassword, nextUsername, nextPasswor
 
 function adminLogout() {
   clearToken();
-  location.replace("admin-login.html");
+  location.replace("/admin-login");
 }
 
 protectAdminRoute();

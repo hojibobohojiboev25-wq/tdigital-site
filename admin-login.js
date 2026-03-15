@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const { isAdminAuthenticated, adminLogin } = window.TDigitalAdminAuth;
 
   if (await isAdminAuthenticated()) {
-    location.replace("admin.html");
+    location.replace("/admin");
     return;
   }
 
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
     const params = new URLSearchParams(location.search);
-    const next = params.get("next") || "admin.html";
-    location.replace(next);
+    const next = params.get("next") || "admin";
+    location.replace("/" + next);
   });
 });

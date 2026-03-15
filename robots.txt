@@ -1,0 +1,27 @@
+# robots.txt for T.Digital / OrzuIT
+# Tells search engines which URLs may be indexed and where the sitemap is.
+# See SEO.md for why each directive matters.
+
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /services
+Allow: /contacts
+Allow: /projects
+Allow: /founder
+Allow: /service
+Allow: /project
+
+# Block admin area from indexing (login, dashboard, content editing)
+Disallow: /admin
+Disallow: /admin-login
+Disallow: /admin-home
+Disallow: /admin-services
+Disallow: /admin-about
+Disallow: /admin-contacts
+Disallow: /admin-projects
+Disallow: /admin-orders
+Disallow: /admin-telegram
+
+# Sitemap location (replace with your real domain if different)
+Sitemap: https://orzuit.de/sitemap.xml
