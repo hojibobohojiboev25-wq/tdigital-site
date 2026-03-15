@@ -56,6 +56,7 @@ function initHomePage(state, saveContent) {
   const form = document.getElementById("homeForm");
   const status = document.getElementById("status");
   const siteName = document.getElementById("siteName");
+  const siteLogo = document.getElementById("siteLogo");
   const homeTitle = document.getElementById("homeTitle");
   const homeSubtitle = document.getElementById("homeSubtitle");
   const homeIntro = document.getElementById("homeIntro");
@@ -63,6 +64,7 @@ function initHomePage(state, saveContent) {
   const homeCtaLink = document.getElementById("homeCtaLink");
 
   siteName.value = state.siteName;
+  if (siteLogo) siteLogo.value = state.siteLogo || "";
   homeTitle.value = state.home.title;
   homeSubtitle.value = state.home.subtitle;
   homeIntro.value = state.home.intro;
@@ -74,6 +76,7 @@ function initHomePage(state, saveContent) {
     const next = {
       ...state,
       siteName: siteName.value.trim() || state.siteName,
+      siteLogo: (siteLogo && siteLogo.value.trim()) || state.siteLogo || "",
       home: {
         title: homeTitle.value.trim(),
         subtitle: homeSubtitle.value.trim(),
@@ -328,15 +331,79 @@ function getProjectDetailsFromRows(container) {
   }));
 }
 
-function renderProjectRows(container, projects) {
+function renderCategoryRows(container, categories, onUpdate) {
+  if (!container) return;
   container.innerHTML = "";
+  const list = Array.isArray(categories) ? categories.map((c) => ({ id: c.id || "", name: c.name || "" })) : [];
+  list.forEach((cat, idx) => {
+    const rowWrap = document.createElement("div");
+    rowWrap.className = "detail-row";
+    const nameInput = createInput("Kategoriename", cat.name);
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "button ghost";
+    delBtn.textContent = "Loschen";
+    delBtn.addEventListener("click", () => {
+      list.splice(idx, 1);
+      renderCategoryRows(container, list, onUpdate);
+      if (typeof onUpdate === "function") onUpdate();
+    });
+    rowWrap.append(nameInput.label, delBtn);
+    rowWrap._nameInput = nameInput.input;
+    rowWrap._categoryId = cat.id || "cat_" + Date.now();
+    container.appendChild(rowWrap);
+  });
+}
+
+function getCategoriesFromRows(container) {
+  if (!container) return [];
+  return Array.from(container.children).map((row) => ({
+    id: row._categoryId || "cat_" + Date.now(),
+    name: (row._nameInput && row._nameInput.value.trim()) || ""
+  })).filter((c) => c.name);
+}
+
+function generateUniqueProjectNumber(existingNumbers) {
+  const set = new Set(existingNumbers.map(String));
+  for (let i = 0; i < 1000; i++) {
+    const n = 10000 + Math.floor(Math.random() * 90000);
+    const s = String(n);
+    if (!set.has(s)) {
+      set.add(s);
+      return s;
+    }
+  }
+  return String(10000 + Math.floor(Math.random() * 90000));
+}
+
+function renderProjectRows(container, projects, categories) {
+  container.innerHTML = "";
+  const cats = Array.isArray(categories) ? categories : [];
   projects.forEach((project, index) => {
     const wrap = document.createElement("div");
     wrap.className = "item-card";
+    const numberDisplay = document.createElement("p");
+    numberDisplay.className = "muted";
+    numberDisplay.style.marginBottom = "8px";
+    numberDisplay.textContent = project.number ? "Projektnummer: " + project.number : "(Nummer wird beim Speichern vergeben)";
+    wrap.appendChild(numberDisplay);
     const name = createInput("Projektname", project.name);
     const description = createInput("Projektbeschreibung", project.description, "textarea");
     const link = createInput("Link", project.link);
-    wrap.append(name.label, description.label, link.label);
+    const catLabel = document.createElement("label");
+    catLabel.textContent = "Kategorie";
+    const catSelect = document.createElement("select");
+    catSelect.innerHTML = "<option value=\"\">— Keine —</option>";
+    cats.forEach((c) => {
+      const opt = document.createElement("option");
+      opt.value = c.id || "";
+      opt.textContent = c.name || "";
+      if ((project.categoryId || "") === (c.id || "")) opt.selected = true;
+      catSelect.appendChild(opt);
+    });
+    catLabel.appendChild(catSelect);
+    wrap.append(name.label, description.label, link.label, catLabel);
+    wrap._categorySelect = catSelect;
 
     const detailsHeading = document.createElement("p");
     detailsHeading.className = "muted";
@@ -374,6 +441,7 @@ function renderProjectRows(container, projects) {
     wrap._descriptionInput = description.input;
     wrap._linkInput = link.input;
     wrap._detailsContainer = detailsContainer;
+    wrap._projectNumber = project.number || "";
     container.appendChild(wrap);
   });
 }
@@ -383,28 +451,58 @@ function initProjectsPage(state, saveContent) {
   const status = document.getElementById("status");
   const rows = document.getElementById("projectsRows");
   const add = document.getElementById("addProject");
+  const categoriesRows = document.getElementById("categoriesRows");
+  const addCategory = document.getElementById("addCategory");
   const projects = state.projects.map((item) => ({ ...item }));
+  const categories = (state.projectCategories || []).map((c) => ({ ...c }));
 
-  renderProjectRows(rows, projects);
+  function refreshProjectRows() {
+    renderProjectRows(rows, projects, categories);
+  }
+
+  renderCategoryRows(categoriesRows, categories, refreshProjectRows);
+  refreshProjectRows();
+
+  if (addCategory && categoriesRows) {
+    addCategory.addEventListener("click", () => {
+      categories.push({ id: "cat_" + Date.now(), name: "Neue Kategorie" });
+      renderCategoryRows(categoriesRows, categories, refreshProjectRows);
+      refreshProjectRows();
+    });
+  }
 
   add.addEventListener("click", () => {
-    projects.push({ name: "Neues Projekt", description: "Projektbeschreibung", link: "#", details: [] });
-    renderProjectRows(rows, projects);
+    projects.push({ name: "Neues Projekt", description: "Projektbeschreibung", link: "#", details: [], categoryId: (categories[0] && categories[0].id) || "" });
+    refreshProjectRows();
   });
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const nextProjects = Array.from(rows.children)
+    const nextCategories = getCategoriesFromRows(categoriesRows);
+    const rawProjects = Array.from(rows.children)
       .map((row) => ({
         name: row._nameInput.value.trim(),
         description: row._descriptionInput.value.trim(),
         link: row._linkInput.value.trim(),
-        details: row._detailsContainer ? getProjectDetailsFromRows(row._detailsContainer) : []
+        categoryId: (row._categorySelect && row._categorySelect.value) || "",
+        details: row._detailsContainer ? getProjectDetailsFromRows(row._detailsContainer) : [],
+        number: row._projectNumber || ""
       }))
       .filter((item) => item.name);
 
+    const usedNumbers = new Set();
+    const nextProjects = rawProjects.map((p) => {
+      let num = (p.number && String(p.number).trim()) || "";
+      if (num.length !== 5 || !/^\d{5}$/.test(num)) {
+        num = generateUniqueProjectNumber(Array.from(usedNumbers));
+      }
+      usedNumbers.add(num);
+      return { ...p, number: num };
+    });
+
     const next = {
       ...state,
+      projectCategories: nextCategories,
       projects: nextProjects
     };
     try {
@@ -415,6 +513,12 @@ function initProjectsPage(state, saveContent) {
       return;
     }
     showSaved(status);
+    projects.length = 0;
+    nextProjects.forEach((p) => projects.push({ ...p }));
+    categories.length = 0;
+    nextCategories.forEach((c) => categories.push({ ...c }));
+    renderCategoryRows(categoriesRows, categories, refreshProjectRows);
+    refreshProjectRows();
   });
 }
 

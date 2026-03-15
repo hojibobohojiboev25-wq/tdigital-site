@@ -1,5 +1,6 @@
 const defaultContent = {
   siteName: "OrzuIT",
+  siteLogo: "https://i.imgur.com/qiFjcQR.jpeg",
   home: {
     title: "Wir entwickeln Websites und Web-Apps für kleine Unternehmen",
     subtitle: "Ein IT-Unternehmen mit Fokus auf Qualität, Tempo und klare Ergebnisse",
@@ -47,12 +48,18 @@ const defaultContent = {
     telegram: "@orzuit_team",
     workingHours: "Mo-Fr, 09:00-18:00"
   },
+  projectCategories: [
+    { id: "web", name: "Websites" },
+    { id: "app", name: "Apps" }
+  ],
   projects: [
     {
       name: "Meine Projekte",
       description:
         "Hier werden Ihre realisierten Projekte veroffentlicht: Websites und Web-Anwendungen fur kleine Unternehmen.",
       link: "#",
+      number: "10001",
+      categoryId: "web",
       details: []
     }
   ]
@@ -78,8 +85,17 @@ function normalizeContent(parsed) {
     services: Array.isArray(parsed && parsed.services)
       ? parsed.services.map((s) => ({ ...s, details: s.details != null ? s.details : "" }))
       : defaultContent.services,
+    siteLogo: (parsed && parsed.siteLogo) != null ? parsed.siteLogo : defaultContent.siteLogo,
+    projectCategories: Array.isArray(parsed && parsed.projectCategories)
+      ? parsed.projectCategories
+      : defaultContent.projectCategories,
     projects: Array.isArray(parsed && parsed.projects)
-      ? parsed.projects.map((p) => ({ ...p, details: Array.isArray(p.details) ? p.details : [] }))
+      ? parsed.projects.map((p) => ({
+          ...p,
+          details: Array.isArray(p.details) ? p.details : [],
+          number: p.number != null ? String(p.number) : "",
+          categoryId: p.categoryId != null ? p.categoryId : ""
+        }))
       : defaultContent.projects
   };
 }

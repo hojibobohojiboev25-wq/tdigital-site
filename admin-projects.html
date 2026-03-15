@@ -39,11 +39,18 @@
       <main class="admin-main">
         <header class="admin-header">
           <h1>Projekte bearbeiten</h1>
-          <p>Projektliste hinzufugen und bearbeiten.</p>
+          <p>Projektliste, Kategorien und Projektnummern verwalten.</p>
         </header>
 
         <section class="admin-card">
-          <p class="muted">Das erste Projekt in der Liste wird automatisch als Hauptprojekt auf der Startseite angezeigt. Die Projektvorschau wird automatisch aus dem Projekt-Link geladen.</p>
+          <h2>Kategorien</h2>
+          <p class="muted">Kategorien hinzufugen, andern oder loschen. Jedes Projekt kann einer Kategorie zugeordnet werden.</p>
+          <div id="categoriesRows" class="list"></div>
+          <button id="addCategory" class="button secondary" type="button">Kategorie hinzufugen</button>
+        </section>
+
+        <section class="admin-card">
+          <p class="muted">Das erste Projekt wird als Hauptprojekt auf der Startseite angezeigt. Jedes Projekt erhalt beim Speichern eine eindeutige 5-stellige Projektnummer.</p>
           <form id="projectsForm" class="admin-form">
             <div id="projectsRows" class="list"></div>
             <div class="row-actions">

@@ -723,6 +723,63 @@ main {
   color: var(--text);
 }
 
+.project-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-bottom: 10px;
+  font-size: 0.875rem;
+}
+
+.project-number {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.project-category {
+  color: var(--muted);
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(0, 245, 255, 0.08);
+  border: 1px solid rgba(0, 245, 255, 0.15);
+}
+
+.projects-filter {
+  margin-bottom: 20px;
+}
+
+.projects-filter label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+
+.projects-filter select {
+  padding: 8px 12px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text);
+  font: inherit;
+}
+
+.project-detail-number {
+  margin: -8px 0 12px;
+  font-size: 0.9375rem;
+}
+
+.project-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.project-detail-actions .button {
+  margin-top: 0;
+}
+
 .project-card-actions {
   display: flex;
   flex-wrap: wrap;

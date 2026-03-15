@@ -144,16 +144,21 @@ function renderProjectDetailPage(content) {
     .filter((d) => (d.label || d.value))
     .map((d) => `<div class="project-detail-row"><span class="project-detail-label">${escapeHtml(d.label || "")}</span><span class="project-detail-value">${escapeHtml(d.value || "")}</span></div>`)
     .join("");
+  const projectNumber = (project.number || "").trim();
   const projectLinkUrl = normalizeExternalUrl(project.link);
+  const orderBtn = projectNumber
+    ? `<a class="button" href="contacts.html?project=${encodeURIComponent(projectNumber)}#order-section">Bestellen</a>`
+    : "";
   const openBtn = projectLinkUrl
-    ? `<a class="button" href="${escapeHtml(projectLinkUrl)}" target="_blank" rel="noreferrer">Projekt öffnen</a>`
+    ? `<a class="button secondary" href="${escapeHtml(projectLinkUrl)}" target="_blank" rel="noreferrer">Projekt öffnen</a>`
     : "";
   block.innerHTML = `
     <a class="service-detail-back" href="projects.html">← Projekte</a>
     <h1 class="service-detail-title">${escapeHtml(name)}</h1>
+    ${projectNumber ? `<p class="project-detail-number muted">Projektnummer: ${escapeHtml(projectNumber)}</p>` : ""}
     ${description ? `<p class="service-detail-lead">${escapeHtml(description)}</p>` : ""}
     ${detailsHtml ? `<div class="project-detail-body">${detailsHtml}</div>` : ""}
-    ${openBtn}
+    <div class="project-detail-actions">${orderBtn} ${openBtn}</div>
   `;
   document.title = name + " - " + (content.siteName || "OrzuIT");
 }
@@ -288,10 +293,37 @@ function createContactValueMarkup(type, value) {
 
 function renderProjects(content) {
   const list = document.getElementById("projects-list");
+  const filterWrap = document.getElementById("projects-filter");
+  const categories = content.projectCategories || [];
+  const projects = content.projects || [];
+
+  if (filterWrap && categories.length > 0) {
+    filterWrap.innerHTML = "";
+    const label = document.createElement("label");
+    label.textContent = "Kategorie: ";
+    const select = document.createElement("select");
+    select.id = "project-category-filter";
+    select.innerHTML = "<option value=\"\">Alle</option>";
+    categories.forEach((c) => {
+      const opt = document.createElement("option");
+      opt.value = c.id || "";
+      opt.textContent = c.name || "";
+      select.appendChild(opt);
+    });
+    label.appendChild(select);
+    filterWrap.appendChild(label);
+    select.addEventListener("change", () => {
+      const val = select.value;
+      list.querySelectorAll(".project-card").forEach((card) => {
+        card.style.display = !val || (card.dataset.categoryId === val) ? "" : "none";
+      });
+    });
+  }
+
   if (!list) return;
   list.innerHTML = "";
-  content.projects.forEach((project) => {
-    list.appendChild(createProjectCard(project));
+  projects.forEach((project) => {
+    list.appendChild(createProjectCard(project, false, categories));
   });
 }
 
@@ -301,6 +333,7 @@ function renderFeaturedProject(content) {
   if (!section || !card) return;
 
   const projects = Array.isArray(content.projects) ? content.projects : [];
+  const categories = content.projectCategories || [];
   if (!projects.length) {
     section.hidden = true;
     return;
@@ -309,12 +342,13 @@ function renderFeaturedProject(content) {
   const mainProject = projects[0];
   section.hidden = false;
   card.innerHTML = "";
-  card.appendChild(createProjectCard(mainProject, true));
+  card.appendChild(createProjectCard(mainProject, true, categories));
 }
 
-function createProjectCard(project, isFeatured = false) {
+function createProjectCard(project, isFeatured = false, categories = []) {
   const item = document.createElement("article");
   item.className = isFeatured ? "project-card featured-card" : "card project-card";
+  item.dataset.categoryId = project.categoryId || "";
 
   const linkUrl = normalizeExternalUrl(project.link);
   const domain = getDomainFromUrl(linkUrl);
@@ -357,6 +391,24 @@ function createProjectCard(project, isFeatured = false) {
   title.textContent = project.name || "Projekt";
   item.appendChild(title);
 
+  const meta = document.createElement("div");
+  meta.className = "project-card-meta";
+  const projectNumber = (project.number || "").trim();
+  if (projectNumber) {
+    const numSpan = document.createElement("span");
+    numSpan.className = "project-number";
+    numSpan.textContent = "Nr. " + projectNumber;
+    meta.appendChild(numSpan);
+  }
+  const cat = (project.categoryId && Array.isArray(categories)) ? categories.find((c) => c.id === project.categoryId) : null;
+  if (cat && cat.name) {
+    const catSpan = document.createElement("span");
+    catSpan.className = "project-category";
+    catSpan.textContent = cat.name;
+    meta.appendChild(catSpan);
+  }
+  item.appendChild(meta);
+
   const description = document.createElement("p");
   description.textContent = project.description || "";
   item.appendChild(description);
@@ -369,6 +421,13 @@ function createProjectCard(project, isFeatured = false) {
   const projectName = (project.name || "").trim() || "Projekt";
   detailLink.href = "project.html?name=" + encodeURIComponent(projectName);
   actions.appendChild(detailLink);
+  const orderLink = document.createElement("a");
+  orderLink.className = "button";
+  orderLink.textContent = "Bestellen";
+  orderLink.href = projectNumber
+    ? "contacts.html?project=" + encodeURIComponent(projectNumber) + "#order-section"
+    : "contacts.html#order-section";
+  actions.appendChild(orderLink);
   const link = document.createElement("a");
   link.className = "button secondary";
   link.textContent = "Offnen";
@@ -414,9 +473,14 @@ function getPreviewSources(url) {
   return sources;
 }
 
+const DEFAULT_LOGO_URL = "https://i.imgur.com/qiFjcQR.jpeg";
+
 function applyCommon(content) {
   document.querySelectorAll("[data-site-name]").forEach((el) => {
     el.textContent = content.siteName;
+  });
+  document.querySelectorAll(".brand-logo").forEach((img) => {
+    img.src = (content.siteLogo && content.siteLogo.trim()) || DEFAULT_LOGO_URL;
   });
 }
 
@@ -438,17 +502,23 @@ function fillOrderServiceSelect(services) {
 function applyOrderFormFromUrl(content) {
   const params = new URLSearchParams(location.search);
   const service = params.get("service");
+  const project = params.get("project");
   fillOrderServiceSelect(content.services);
   const select = document.getElementById("order-service");
   if (service && select) {
     const option = Array.from(select.options).find((o) => o.value === service);
     if (option) select.value = service;
-    const section = document.getElementById("order-section");
-    if (section) {
-      requestAnimationFrame(() => {
-        section.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    }
+  }
+  const messageEl = document.getElementById("order-message");
+  if (project && messageEl) {
+    const prefix = "Projektnummer: " + project.trim();
+    messageEl.value = messageEl.value ? messageEl.value + "\n" + prefix : prefix;
+  }
+  const section = document.getElementById("order-section");
+  if ((service || project) && section) {
+    requestAnimationFrame(() => {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }
 }
 

@@ -1,5 +1,6 @@
 const defaultContent = {
   siteName: "OrzuIT",
+  siteLogo: "https://i.imgur.com/qiFjcQR.jpeg",
   home: {
     title: "Wir entwickeln Websites und Web-Apps für kleine Unternehmen",
     subtitle: "Ein IT-Unternehmen mit Fokus auf Qualität, Tempo und klare Ergebnisse",
@@ -37,17 +38,25 @@ const defaultContent = {
     telegram: "@orzuit_team",
     workingHours: "Mo-Fr, 09:00-18:00"
   },
+  projectCategories: [
+    { id: "web", name: "Websites" },
+    { id: "app", name: "Apps" }
+  ],
   projects: [
     {
       name: "Meine Projekte",
       description:
         "Hier werden Ihre realisierten Projekte veroffentlicht: Websites und Web-Anwendungen fur kleine Unternehmen.",
       link: "#",
+      number: "10001",
+      categoryId: "web",
       details: [
         { label: "Programmiersprache", value: "" },
         { label: "Technologien", value: "" },
         { label: "Arbeitsstunden", value: "" },
-        { label: "Anzahl Programmierer", value: "" }
+        { label: "Anzahl Programmierer", value: "" },
+        { label: "Preis", value: "" },
+        { label: "Erstellungszeit", value: "" }
       ]
     }
   ]

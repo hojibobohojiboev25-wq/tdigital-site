@@ -8,6 +8,7 @@ module.exports = async function handler(req, res) {
 
   try {
     const content = await getContent();
+    res.setHeader("Cache-Control", "public, max-age=60");
     return sendJson(res, 200, { content });
   } catch (error) {
     return sendJson(res, 500, { error: "Failed to load content." });
